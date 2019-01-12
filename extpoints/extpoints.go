@@ -127,6 +127,57 @@ func (ep *extensionPoint) unregister(name string) bool {
 	return true
 }
 
+// Addon
+
+var Addons = &addonExt{
+	newExtensionPoint(new(Addon)),
+}
+
+type addonExt struct {
+	*extensionPoint
+}
+
+func (ep *addonExt) Unregister(name string) bool {
+	return ep.unregister(name)
+}
+
+func (ep *addonExt) Register(extension Addon, name string) bool {
+	return ep.register(extension, name)
+}
+
+func (ep *addonExt) Lookup(name string) Addon {
+	ext := ep.lookup(name)
+	if ext == nil {
+		return nil
+	}
+	return ext.(Addon)
+}
+
+func (ep *addonExt) Select(names []string) []Addon {
+	var selected []Addon
+	for _, name := range names {
+		selected = append(selected, ep.Lookup(name))
+	}
+	return selected
+}
+
+func (ep *addonExt) All() map[string]Addon {
+	all := make(map[string]Addon)
+	for k, v := range ep.all() {
+		all[k] = v.(Addon)
+	}
+	return all
+}
+
+func (ep *addonExt) Names() []string {
+	var names []string
+	for k := range ep.all() {
+		names = append(names, k)
+	}
+	return names
+}
+
+
 // EventData
 
 var EventDatas = &eventDataExt{
